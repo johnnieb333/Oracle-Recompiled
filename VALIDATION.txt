@@ -15,3 +15,5 @@ Regenerated Ages: user verified LCD filter, manual save-state loading, autosave 
 Launcher: Windows build, both game launches with existing saves, and remembered ROM locations passed user testing.
 
 Double-click launcher test passed for both games after copying their required MinGW/SDL2 DLLs beside the executables.
+
+Automatic setup passed on the existing Windows toolchain, reusing current builds. Start-Oracle.bat opened the launcher, and both games launched with existing saves. Fresh-machine setup and a complete first build through this setup flow remain untested.

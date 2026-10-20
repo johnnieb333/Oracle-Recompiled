@@ -1,0 +1,36 @@
+Oracle automatic setup — Windows test preview
+
+1. Double-click Setup-Oracle.bat.
+2. Select your Ages USA ROM, then your Seasons USA ROM.
+3. Leave the build window open. The first build may take 20-40 minutes or longer.
+4. When setup finishes, the launcher opens. Later, use Start-Oracle.bat.
+
+This automates local code generation, game/compiler/launcher builds, DLL copying,
+and remembering ROM locations. It never uploads ROMs or copies them into the project.
+The generator uses temporary local copies and removes those when generation ends.
+Game saves and save states are preserved. Replaced DLLs, previous generated code,
+and launcher settings are backed up under the ignored build-setup-backups folder.
+Close games and the launcher before running setup.
+
+Prerequisite for this first preview: MSYS2 MINGW64 with GCC, CMake, Ninja, Python,
+and SDL2 installed. It detects C:/msys64 or asks for an existing MSYS2 folder.
+It does not install, update, or change your compiler packages.
+
+For a new machine, install MSYS2 from https://www.msys2.org/ and follow its update
+instructions. In its MINGW64 terminal install the prerequisites:
+
+pacman -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2 python
+
+Automatic provisioning on a fresh machine is not included in this first preview.
+Use a local writable source folder, not the ZIP viewer or Program Files.
+Both supported 1 MiB USA ROMs are required by the current game CMake project.
+Use ROM paths supported by the Windows system code page, as documented for the launcher.
+
+Setup builds in build-tools, build, and build-launcher. It does not touch other
+projects, ages-verified, seasons-verified, or their saves. Do not run two setup
+instances for the same project at the same time.
+
+Local checks cover Bash syntax, installer repeat behavior and preservation,
+generated-code reuse/backup decisions, and DLL/INI backup behavior.
+Windows PowerShell dialogs and the end-to-end double-click workflow remain
+pending user testing. This is a source setup preview, not a prebuilt game release.
