@@ -9,3 +9,5 @@ existing output refused without changes; unexpected source form refused.
 Both games regenerated and built successfully on Windows. User confirmed movement, audio, and battery-save reload in both, plus working enhancements in Seasons.
 Earlier separate external-ROM builds launched and reloaded battery saves for both games on the user machine.
 This does not establish full playthrough correctness or release readiness.
+
+Regenerated Ages: user verified LCD filter, manual save-state loading, autosave loading, and editor rupee application.

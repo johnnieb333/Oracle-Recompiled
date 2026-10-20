@@ -36,7 +36,7 @@ Run from MINGW64 while testing so installed SDL2/compiler DLLs can be found. Eac
 
 The earlier isolated external-ROM builds launched and retained battery saves after closing and reopening for both games on Windows. On October 20, 2026, both games were regenerated from user-supplied ROMs, built on Windows, and passed movement, audio, and battery-save reload checks. The user also confirmed the enhancements work in Seasons. No complete playthrough has been verified.
 
-The runtime includes save-state previews, rotating autosaves, LCD filters, fullscreen, controller remapping, fast-forward, game-specific editors, and linked-password tools. These features were exercised in earlier working builds, with enhancements also checked in regenerated Seasons. Individual enhancement checks in regenerated Ages remain pending. Ages ring-password filling remains unfinished; five-character NPC secrets, a shared launcher, achievements, and a password library are not implemented.
+The runtime includes save-state previews, rotating autosaves, LCD filters, fullscreen, controller remapping, fast-forward, game-specific editors, and linked-password tools. These features were exercised in earlier working builds, with enhancements also checked in regenerated Seasons. Regenerated Ages also passed LCD filter, manual save-state loading, autosave loading, and editor rupee-application checks. Ages ring-password filling remains unfinished; five-character NPC secrets, a shared launcher, achievements, and a password library are not implemented.
 
 ## Credits and notices
 
