@@ -36,7 +36,7 @@ Run from MINGW64 while testing so installed SDL2/compiler DLLs can be found. Eac
 
 The earlier isolated external-ROM builds launched and retained battery saves after closing and reopening for both games on Windows. On October 20, 2026, both games were regenerated from user-supplied ROMs, built on Windows, and passed movement, audio, and battery-save reload checks. The user also confirmed the enhancements work in Seasons. No complete playthrough has been verified.
 
-The runtime includes save-state previews, rotating autosaves, LCD filters, fullscreen, controller remapping, fast-forward, game-specific editors, and linked-password tools. These features were exercised in earlier working builds, with enhancements also checked in regenerated Seasons. Regenerated Ages also passed LCD filter, manual save-state loading, autosave loading, and editor rupee-application checks. Ages ring-password filling remains unfinished; five-character NPC secrets, a shared launcher, achievements, and a password library are not implemented.
+The runtime includes save-state previews, rotating autosaves, LCD filters, fullscreen, controller remapping, fast-forward, game-specific editors, and linked-password tools. These features were exercised in earlier working builds, with enhancements also checked in regenerated Seasons. Regenerated Ages also passed LCD filter, manual save-state loading, autosave loading, and editor rupee-application checks. Ages ring-password filling remains unfinished; five-character NPC secrets, achievements, and a password library are not implemented.
 
 ## Credits and notices
 
@@ -49,3 +49,26 @@ The runtime includes save-state previews, rotating autosaves, LCD filters, fulls
 - Linked-secret codec: ZoraSharp by Amy Nagle, adapted under LGPL-3.0-or-later; see notices/6-THIRD_PARTY.txt and LGPL/GPL texts.
 
 Retain LICENSE, vendor/LICENSE, all notices, and third-party license files. The MIT notices exclude generated game code. Binary distribution and LGPL relinking materials have not been finalized in this preview. This archive distributes source only.
+
+## Windows launcher
+
+The launcher selects and remembers both ROM locations.
+Both games launched with their existing test saves.
+Double-click launching passed after copying the required DLLs.
+
+From the project root, build the launcher:
+
+    cmake -S launcher -B build-launcher -G Ninja -DCMAKE_BUILD_TYPE=Release
+    cmake --build build-launcher --parallel 2
+
+Open build-launcher/bin/oracle-launcher.exe.
+
+For double-click launching, copy libwinpthread-1.dll from
+C:/msys64/mingw64/bin into build-launcher/bin.
+Copy libwinpthread-1.dll, libgcc_s_seh-1.dll, libstdc++-6.dll,
+and SDL2.dll from that directory into both build/bin/ages
+and build/bin/seasons.
+
+Keep the launcher in build-launcher/bin.
+See launcher/README.md for details.
+No prebuilt game package is supplied.
