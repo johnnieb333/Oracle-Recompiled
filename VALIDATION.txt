@@ -1,0 +1,11 @@
+Source preview validation — 2026-10-20
+
+Uploaded compiler sources compiled successfully with g++ -std=c++20.
+Synthetic 1 MiB input (not a commercial game) exercised compiler generation.
+Generation checks passed: unsupported ROM rejected before generation; original input unchanged;
+only gameplay C/header/metadata retained; embedded initializer removed; generated C passed GCC C11 syntax;
+existing output refused without changes; unexpected source form refused.
+
+Both games regenerated and built successfully on Windows. User confirmed movement, audio, and battery-save reload in both, plus working enhancements in Seasons.
+Earlier separate external-ROM builds launched and reloaded battery saves for both games on the user machine.
+This does not establish full playthrough correctness or release readiness.

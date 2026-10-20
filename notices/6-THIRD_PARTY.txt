@@ -1,0 +1,20 @@
+Oracle linked-secret codec
+
+Based on ZoraSharp, copyright 2013-2018 Amy Nagle.
+https://github.com/kabili207/zora-sharp
+Reference revision: 8edf94a9b5916239b21cfecf1a42e523e159a65d
+GameSecret.cs, RingSecret.cs, Secret.cs, SecretParser.cs, USEncoding.cs.
+
+The C++ adaptation oracle_linked_core.h is LGPL-3.0-or-later.
+This package supplies its complete source and the LGPL/GPL license texts.
+Other original project components retain their existing licenses.
+
+Adaptation changes: strict English-name validation; US-only six-bit codec;
+UTF-8/braced-symbol parser; checked native entry-buffer/graphics writes;
+clipboard/menu integration in new source; no C# or .NET runtime dependency.
+
+If distributing binaries containing this adaptation, retain notices and
+license texts, make the corresponding library source and modifications
+available, and provide the materials required by LGPL section 4 for
+recombination/relinking with a modified version. Do not assume an executable
+alone satisfies those requirements.
