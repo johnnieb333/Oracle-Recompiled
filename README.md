@@ -1,5 +1,7 @@
 # Oracle Portable — Interpreter Preview
 
+[Join our Discord](https://discord.gg/hsJHBQfmAS) — chat, get help, report bugs, and follow updates.
+
 An enhanced, interpreter-based player for Oracle of Ages and Oracle of Seasons.
 This version is not a static recompilation. The static recompilation remains
 on the main branch.
