@@ -7,6 +7,12 @@
 #include <string.h>
 #include <time.h>
 #include "gbrt_debug.h"
+#if defined(GB_HAS_SDL2) && defined(LA_HAS_IMGUI)
+extern bool oracle_independent_sword_read(GBContext*, uint16_t, uint8_t*);
+extern bool oracle_independent_sword_enter(GBContext*);
+extern uint8_t oracle_independent_sword_assignment(GBContext*, uint16_t, uint8_t);
+#endif
+
 
 /* ============================================================================
  * Definitions
@@ -463,6 +469,22 @@ uint8_t gb_read8(GBContext* ctx, uint16_t addr) {
         return 0xFF;  /* Bus conflict - return undefined */
     }
     
+#if defined(GB_HAS_SDL2) && defined(LA_HAS_IMGUI)
+    if (ctx->rom_bank == 6 &&
+        (((ctx->pc == 0x5052 || ctx->pc == 0x5055) && addr == 0xcc46) ||
+         ((ctx->pc == 0x48f6 || ctx->pc == 0x48f7) && addr == 0xc680) ||
+         ((ctx->pc == 0x491e || ctx->pc == 0x491f) && (addr == 0xcc45 || addr == 0xcc46)) ||
+         ((ctx->pc == 0x53eb || ctx->pc == 0x53ee) && addr == 0xcc45) ||
+         ((ctx->pc == 0x520a || ctx->pc == 0x520d) && addr == 0xcc2a) ||
+         ((ctx->pc == 0x4957 || ctx->pc == 0x4958) && addr == 0xc688) ||
+         ((ctx->pc == 0x4979 || ctx->pc == 0x497a) && (addr == 0xcc29 || addr == 0xcc2a)) ||
+         ((ctx->pc == 0x5499 || ctx->pc == 0x549c) && addr == 0xcc29))) {
+        uint8_t independent_value;
+        if (oracle_independent_sword_read(ctx, addr, &independent_value))
+            return independent_value;
+    }
+#endif
+
     /* ROM Bank 0 (0x0000-0x3FFF) */
     if (addr < 0x4000) {
         /* MBC1 Mode 1: Upper bits affect bank 0 region too */
@@ -791,6 +813,10 @@ void gb_write8(GBContext* ctx, uint16_t addr, uint8_t value) {
         return;
     }
     if (addr < 0xE000) {
+#if defined(GB_HAS_SDL2) && defined(LA_HAS_IMGUI)
+        if (ctx->rom_bank == 6 && (ctx->pc == 0x485d || ctx->pc == 0x485e || ctx->pc == 0x48ab || ctx->pc == 0x48ac) && (addr == 0xd203 || addr == 0xd303 || addr == 0xd403 || addr == 0xd503))
+            value = oracle_independent_sword_assignment(ctx, addr, value);
+#endif
         uint32_t wram_off = (ctx->wram_bank * WRAM_BANK_SIZE) + (addr - 0xD000);
         /* Watch game state variables */
 #ifdef GB_DEBUG
@@ -1466,6 +1492,10 @@ uint32_t gb_step(GBContext* ctx) {
     }
 
     uint32_t start = ctx->cycles;
+    /* Independent X: cover interpreted and generated execution paths. */
+    if (ctx->rom_bank == 6 && (ctx->pc == 0x48c1 || ctx->pc == 0x4922) &&
+        gb_independent_sword_before_update(ctx))
+        return ctx->cycles - start;
     gb_dispatch(ctx, ctx->pc);
     return ctx->cycles - start;
 }
@@ -1523,4 +1553,14 @@ void gb_audio_callback(GBContext* ctx, int16_t l, int16_t r) {
     if (ctx && ctx->callbacks.on_audio_sample) {
         ctx->callbacks.on_audio_sample(ctx, l, r);
     }
+}
+
+/* Called from the private generated source immediately before parent-item updates. */
+bool gb_independent_sword_before_update(GBContext* ctx) {
+#if defined(GB_HAS_SDL2) && defined(LA_HAS_IMGUI)
+    return oracle_independent_sword_enter(ctx);
+#else
+    (void)ctx;
+    return false;
+#endif
 }

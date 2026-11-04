@@ -1,19 +1,21 @@
-Source preview validation — 2026-10-20
+Oracle Portable v0.2.0-beta — validation scope
 
-Uploaded compiler sources compiled successfully with g++ -std=c++20.
-Synthetic 1 MiB input (not a commercial game) exercised compiler generation.
-Generation checks passed: unsupported ROM rejected before generation; original input unchanged;
-only gameplay C/header/metadata retained; embedded initializer removed; generated C passed GCC C11 syntax;
-existing output refused without changes; unexpected source form refused.
+Reported Windows gameplay tests: both games launch through the launcher;
+owned-item dropdowns, assignments and feature/indicator settings persist.
+Seasons: 15 selectable extra items exercised, upgrades and zero-ammo checks.
+Ages: 15 selectable extra items exercised, sword/shield holds through scrolls,
+simultaneous items, A/B aliases, carry/throw, ammo and zero-ammo checks,
+Switch/Long Hook swapping, Cane block creation/removal and all Harp tunes.
+Editors reopen after all four Seasons changes and all three Ages travel methods.
+Exact speed entry and keyboard Enter capture were tested in gameplay.
 
-Both games regenerated and built successfully on Windows. User confirmed movement, audio, and battery-save reload in both, plus working enhancements in Seasons.
-Earlier separate external-ROM builds launched and reloaded battery saves for both games on the user machine.
-This does not establish full playthrough correctness or release readiness.
+Local automated checks: actual interpreter input/initialization fixtures,
+Seasons regression checks, owned/sorted menu checks, option persistence,
+warp-guard regression checks and full changed C++ translation-unit syntax.
+Ages fixture slot-priority selection is simulated; it is not a full game run.
 
-Regenerated Ages: user verified LCD filter, manual save-state loading, autosave loading, and editor rupee application.
-
-Launcher: Windows build, both game launches with existing saves, and remembered ROM locations passed user testing.
-
-Double-click launcher test passed for both games after copying their required MinGW/SDL2 DLLs beside the executables.
-
-Automatic setup passed on the existing Windows toolchain, reusing current builds. Start-Oracle.bat opened the launcher, and both games launched with existing saves. Fresh-machine setup and a complete first build through this setup flow remain untested.
+Not fully verified: complete playthroughs, every dungeon/boss or item combination,
+companion summoning, Seasons magnetic attraction/repulsion puzzle behavior,
+and Ages heavy-statue lifting. These features are not claimed fully tested.
+No achievements system or widescreen feature is added by this release.
+A fresh-folder release-candidate smoke test is still required.

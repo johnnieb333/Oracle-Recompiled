@@ -108,6 +108,11 @@ extern "C" const char* gb_slots_status(void) { return slot_status; }
 
 static bool slot_save_state_impl(GBContext* ctx) {
     if (!slot_ready(ctx)) return false;
+    if (oracle_extra_test::borrowing(ctx)) {
+        snprintf(slot_status, sizeof(slot_status), "Release extra-item buttons and wait for the item action before saving.");
+        fprintf(stderr, "[EXTRA-SWORD] Release extra-item buttons and wait for the item action before saving.\n");
+        return false;
+    }
     const int slot = slot_selected;
     std::vector<uint8_t> data(slot_payload_size(ctx));
     size_t pos = 0;
@@ -176,6 +181,7 @@ static bool slot_load_state_impl(GBContext* ctx) {
         snprintf(slot_status, sizeof(slot_status), "Slot %d is empty, damaged, or incompatible.", slot_selected);
         return false;
     }
+    oracle_extra_test::before_load(ctx);
     /* Validate the complete file before modifying any live game state. */
     GBContext staged = *ctx;
     size_t pos = 0;

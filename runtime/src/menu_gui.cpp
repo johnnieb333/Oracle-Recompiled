@@ -126,6 +126,19 @@ static PadBind g_pad_binds[GB_BTN_COUNT] = {
     { SDL_CONTROLLER_BUTTON_START,      SDL_CONTROLLER_BUTTON_Y, -1, 0 },    /* Start  (+ Y) */
 };
 
+/* EXTRA_X_MENU_V1: first configurable extra-item slot. */
+static bool g_extra_items_enabled = false;
+static bool g_extra_indicators = false;
+extern "C" int menu_gui_extra_items_enabled(void) { return g_extra_items_enabled; }
+extern "C" int menu_gui_extra_indicators_enabled(void) { return g_extra_indicators; }
+static int g_extra_x_item = 5; /* 0=None; 5=Sword; 0x17=Feather. */
+static int g_extra_y_item = 0;
+static int g_extra_r_item = 0;
+static int g_extra_l_item = 0;
+extern "C" int menu_gui_get_extra_x_item(void) { return g_extra_x_item; }
+extern "C" int menu_gui_get_extra_y_item(void) { return g_extra_y_item; }
+extern "C" int menu_gui_get_extra_r_item(void) { return g_extra_r_item; }
+extern "C" int menu_gui_get_extra_l_item(void) { return g_extra_l_item; }
 static float g_deadzone = 0.2f;
 
 /* Rebinding state */
@@ -196,6 +209,12 @@ extern "C" void menu_gui_save_bindings(void) {
     fprintf(f, "scanlines %d\n", g_menu.scanlines ? 1 : 0);
     fprintf(f, "auto_save %d\n", g_autosave_minutes > 0 ? 1 : 0);
     fprintf(f, "autosave_minutes %d\n", g_autosave_minutes);
+    fprintf(f, "extra_items_enabled %d\n", (int)g_extra_items_enabled);
+    fprintf(f, "extra_items_indicators %d\n", (int)g_extra_indicators);
+    fprintf(f, "extra_x_item %d\n", g_extra_x_item);
+    fprintf(f, "extra_y_item %d\n", g_extra_y_item);
+    fprintf(f, "extra_r_item %d\n", g_extra_r_item);
+    fprintf(f, "extra_l_item %d\n", g_extra_l_item);
     fclose(f);
     fprintf(stderr, "[MENU] Settings saved to %s\n", path);
 }
@@ -220,6 +239,26 @@ extern "C" void menu_gui_load_bindings(void) {
         } else if (sscanf(line, "deadzone %f", &dz) == 1) {
             g_deadzone = dz;
         }
+        int extra_item;
+        int extra_option;
+        if (sscanf(line, "extra_items_enabled %d", &extra_option) == 1 &&
+            (extra_option == 0 || extra_option == 1))
+            g_extra_items_enabled = extra_option != 0;
+        if (sscanf(line, "extra_items_indicators %d", &extra_option) == 1 &&
+            (extra_option == 0 || extra_option == 1))
+            g_extra_indicators = extra_option != 0;
+        if (sscanf(line, "extra_x_item %d", &extra_item) == 1 &&
+            (extra_item == 4 || extra_item == 0x0a || extra_item == 0x0f || extra_item == 0x11 || extra_item == 0 || extra_item == 1 || extra_item == 0x16 || extra_item == 3 || extra_item == 0x15 || extra_item == 0x19 || extra_item == 0x13 || extra_item == 0x0d || extra_item == 0x0c || extra_item == 0x1e || extra_item == 7 || extra_item == 8 || extra_item == 0x0e || extra_item == 5 || extra_item == 0x17 || extra_item == 6))
+            g_extra_x_item = extra_item;
+        if (sscanf(line, "extra_y_item %d", &extra_item) == 1 &&
+            (extra_item == 4 || extra_item == 0x0a || extra_item == 0x0f || extra_item == 0x11 || extra_item == 0 || extra_item == 1 || extra_item == 0x16 || extra_item == 3 || extra_item == 0x15 || extra_item == 0x19 || extra_item == 0x13 || extra_item == 0x0d || extra_item == 0x0c || extra_item == 0x1e || extra_item == 7 || extra_item == 8 || extra_item == 0x0e || extra_item == 5 || extra_item == 0x17 || extra_item == 6))
+            g_extra_y_item = extra_item;
+        if (sscanf(line, "extra_r_item %d", &extra_item) == 1 &&
+            (extra_item == 4 || extra_item == 0x0a || extra_item == 0x0f || extra_item == 0x11 || extra_item == 0 || extra_item == 1 || extra_item == 0x16 || extra_item == 3 || extra_item == 0x15 || extra_item == 0x19 || extra_item == 0x13 || extra_item == 0x0d || extra_item == 0x0c || extra_item == 0x1e || extra_item == 7 || extra_item == 8 || extra_item == 0x0e || extra_item == 5 || extra_item == 0x17 || extra_item == 6))
+            g_extra_r_item = extra_item;
+        if (sscanf(line, "extra_l_item %d", &extra_item) == 1 &&
+            (extra_item == 4 || extra_item == 0x0a || extra_item == 0x0f || extra_item == 0x11 || extra_item == 0 || extra_item == 1 || extra_item == 0x16 || extra_item == 3 || extra_item == 0x15 || extra_item == 0x19 || extra_item == 0x13 || extra_item == 0x0d || extra_item == 0x0c || extra_item == 0x1e || extra_item == 7 || extra_item == 8 || extra_item == 0x0e || extra_item == 5 || extra_item == 0x17 || extra_item == 6))
+            g_extra_l_item = extra_item;
         /* Graphics/Sound settings */
         int ival;
         if (sscanf(line, "scale %d", &ival) == 1 && ival >= 1 && ival <= 8)
@@ -1002,8 +1041,17 @@ static void draw_menu_bar(GBContext* ctx)
             if (ImGui::MenuItem("View Autosaves...")) show_autosaves = true;
             ImGui::MenuItem("Show FPS", NULL, &g_menu.show_fps);
             ImGui::Separator();
-            ImGui::SliderInt("Speed %", &g_menu.speed_percent, 10, 500);
-            if (ImGui::MenuItem("Reset Speed")) g_menu.speed_percent = 100;
+            int requested_speed = g_menu.speed_percent;
+            ImGui::SetNextItemWidth(130);
+            if (ImGui::InputInt("Game speed (%)", &requested_speed, 0, 0,
+                                ImGuiInputTextFlags_EnterReturnsTrue)) {
+                g_menu.speed_percent = requested_speed < 10 ? 10 :
+                                       requested_speed > 500 ? 500 : requested_speed;
+            }
+            ImGui::TextDisabled("Slow down or speed up: 10-500%%. Press Enter.");
+            ImGui::TextDisabled("25%% quarter | 50%% half | 100%% normal");
+            ImGui::TextDisabled("200%% double | 500%% five times");
+            if (ImGui::MenuItem("Reset to Normal (100%)")) g_menu.speed_percent = 100;
             ImGui::Separator();
             ImGui::MenuItem("Debug Window", "F2", &g_menu.show_debug);
             ImGui::EndMenu();
@@ -1277,7 +1325,95 @@ static void draw_debug_window(GBContext* ctx)
  * Controller window
  * ================================================================ */
 
-static void draw_controller_window(void)
+/* Build choices from the current file, without changing saved assignments. */
+static void extra_owned_selector(GBContext* ctx, const char* label, int& setting)
+{
+    int ids[16] = {0};
+    const char* names[16] = {"None"};
+    int count = 1;
+    bool ready = ctx && ctx->wram && ctx->hram &&
+        seasons_editor::supported_rom(ctx) && ctx->hram[0x18] < 3 &&
+        ctx->wram[0x611] == 0 && memcmp(ctx->wram + 0x5b2, "Z11216-0", 8) == 0;
+    if (ready) {
+        const uint8_t* r = ctx->wram;
+        if ((r[0x693] & 0x40) && r[0x6af] <= 3) { ids[count] = 0x0e; names[count++] = "Flute"; }
+        if (r[0x692] & 0x80) { ids[count] = 7; names[count++] = "Rod of Seasons"; }
+        if (r[0x693] & 1) { ids[count] = 8; names[count++] = "Magnetic Gloves"; }
+        if (r[0x695] & 0x40) { ids[count] = 0x1e; names[count++] = "Fool's Ore"; }
+        if (r[0x693] & 0x10) { ids[count] = 0x0c; names[count++] = "Biggoron's Sword"; }
+        if (r[0x693] & 0x20) { ids[count] = 0x0d; names[count++] = "Bombchus"; }
+        if ((r[0x694] & 8) && r[0x6b3] >= 1 && r[0x6b3] <= 2) { ids[count] = 0x13; names[count++] = r[0x6b3] == 2 ? "Hyper Slingshot" : "Slingshot"; }
+        if ((r[0x695] & 2) && r[0x6ae] >= 1 && r[0x6ae] <= 3) { ids[count] = 0x19; names[count++] = "Seed Satchel"; }
+        if (r[0x694] & 0x20) { ids[count] = 0x15; names[count++] = "Shovel"; }
+        if (r[0x692] & 8) { ids[count] = 3; names[count++] = "Bombs"; }
+        if (r[0x694] & 0x40) { ids[count] = 0x16; names[count++] = "Power Bracelet"; }
+        static const char* shield[] = {"", "Wooden Shield", "Iron Shield", "Mirror Shield"};
+        if ((r[0x692] & 2) && r[0x6a9] >= 1 && r[0x6a9] <= 3) {
+            ids[count] = 1; names[count++] = shield[r[0x6a9]];
+        }
+        static const char* sword[] = {"", "Wooden Sword", "Noble Sword", "Master Sword"};
+        static const char* feather[] = {"", "Roc's Feather", "Roc's Cape"};
+        static const char* boomerang[] = {"", "Boomerang", "Magical Boomerang"};
+        if ((r[0x692] & 0x20) && r[0x6ac] >= 1 && r[0x6ac] <= 3) {
+            ids[count] = 5; names[count++] = sword[r[0x6ac]];
+        }
+        if ((r[0x694] & 0x80) && r[0x6b4] >= 1 && r[0x6b4] <= 2) {
+            ids[count] = 0x17; names[count++] = feather[r[0x6b4]];
+        }
+        if ((r[0x692] & 0x40) && r[0x6b1] >= 1 && r[0x6b1] <= 2) {
+            ids[count] = 6; names[count++] = boomerang[r[0x6b1]];
+        }
+    }
+    const bool ages_ready = ctx && ctx->wram && ctx->hram &&
+        ages_editor::supported_rom(ctx) && ctx->hram[0x1a] < 3 &&
+        ctx->wram[0x611] == 1 && memcmp(ctx->wram + 0x5b2, "Z21216-0", 8) == 0;
+    if (ages_ready) {
+        const uint8_t* r = ctx->wram;
+        for (int i = 0; i < ages_editor::item_count; ++i) {
+            const ages_editor::Item& item = ages_editor::items[i];
+            if (item.id >= 0x20 || !ages_editor::flag(r, item.id)) continue;
+            const int level = item.level ? ages_editor::mem(r, item.level) : 0;
+            if (item.level && (level < 1 || level > item.maximum)) continue;
+            const char* name = item.name;
+            static const char* sword[] = {"", "Wooden Sword", "Noble Sword", "Master Sword"};
+            static const char* shield[] = {"", "Wooden Shield", "Iron Shield", "Mirror Shield"};
+            if (item.id == 5) name = sword[level];
+            if (item.id == 1) name = shield[level];
+            if (item.id == 0x16) name = level == 2 ? "Power Glove" : "Power Bracelet";
+            if (item.id == 0x0a) name = level == 2 ? "Long Hook" : "Switch Hook";
+            if (item.id == 0x0e) {
+                if (r[0x6b5] > 3) continue;
+                name = "Flute";
+            }
+            ids[count] = item.id; names[count++] = name;
+        }
+    }
+    /* Keep None first; move each item ID together with its displayed name. */
+    for (int i = 2; i < count; ++i) {
+        const int id = ids[i];
+        const char* name = names[i];
+        int j = i;
+        while (j > 1 && strcmp(names[j - 1], name) > 0) {
+            ids[j] = ids[j - 1];
+            names[j] = names[j - 1];
+            --j;
+        }
+        ids[j] = id;
+        names[j] = name;
+    }
+    int selected = -1;
+    for (int i = 0; i < count; ++i) if (ids[i] == setting) selected = i;
+    const char* preview = selected >= 0 ? names[selected] : "Unavailable in current file";
+    if (ImGui::BeginCombo(label, preview)) {
+        for (int i = 0; i < count; ++i) {
+            if (ImGui::Selectable(names[i], selected == i)) setting = ids[i];
+            if (selected == i) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+}
+
+static void draw_controller_window(GBContext* ctx)
 {
     ImGui::SetNextWindowSize(ImVec2(480, 460), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Controller Settings", &g_menu.show_controller)) {
@@ -1378,6 +1514,18 @@ static void draw_controller_window(void)
             ImGui::EndPopup();
         }
 
+        /* EXTRA_OWNED_ITEMS_V1 */
+        ImGui::Text("Extra Item Buttons");
+        ImGui::Checkbox("Enable extra item buttons", &g_extra_items_enabled);
+        ImGui::Checkbox("Show button indicators", &g_extra_indicators);
+        ImGui::TextDisabled("When enabled, gamepad X/Y/L/R use the item choices below.");
+        extra_owned_selector(ctx, "X item", g_extra_x_item);
+        extra_owned_selector(ctx, "Y item", g_extra_y_item);
+        extra_owned_selector(ctx, "L item", g_extra_l_item);
+        extra_owned_selector(ctx, "R item", g_extra_r_item);
+        ImGui::TextDisabled("Only owned, supported items are listed. Choices save automatically.");
+        ImGui::Spacing();
+        ImGui::Separator();
         /* ---- Keyboard bindings table ---- */
         ImGui::Text("Keyboard Bindings");
         ImGui::Separator();
@@ -1479,6 +1627,12 @@ static void draw_controller_window(void)
         }
         ImGui::SameLine();
         if (ImGui::Button("Reset Defaults")) {
+            g_extra_items_enabled = false;
+            g_extra_indicators = false;
+            g_extra_x_item = 5;
+            g_extra_y_item = 0;
+            g_extra_r_item = 0;
+            g_extra_l_item = 0;
             /* Reset keyboard */
             g_key_binds[GB_BTN_UP]     = { SDL_SCANCODE_UP,     SDL_SCANCODE_W };
             g_key_binds[GB_BTN_DOWN]   = { SDL_SCANCODE_DOWN,   SDL_SCANCODE_S };
@@ -1509,24 +1663,21 @@ static void draw_controller_window(void)
 
 static void draw_about_window(void)
 {
-    ImGui::SetNextWindowSize(ImVec2(340, 280), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(440, 340), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("About", &g_menu.show_about)) {
-        ImGui::Text("Link's Awakening DX");
-        ImGui::Text("Static Recompilation for Windows");
+        ImGui::Text("Oracle Portable v0.2.0-beta");
+        ImGui::Text("Oracle of Ages and Oracle of Seasons");
         ImGui::Separator();
         ImGui::Spacing();
-        ImGui::BulletText("Recompiler: gb-recompiled");
-        ImGui::BulletText("Functions: 17,805 recompiled");
-        ImGui::BulletText("Code: 4.2M lines of generated C");
-        ImGui::BulletText("ROM: 1MB, 64 banks, MBC5");
-        ImGui::Spacing();
-        ImGui::BulletText("Developer: Nintendo (1998)");
-        ImGui::BulletText("CPU: Sharp SM83 @ 4/8 MHz");
+        ImGui::TextWrapped("An interpreter-based player for your own supported USA ROMs.");
+        ImGui::TextWrapped("F1 > Controller: enable extra item buttons and assign X/Y/L/R.");
         ImGui::Spacing();
         ImGui::Text("Credits");
-        ImGui::BulletText("gb-recompiled by arcanite24");
-        ImGui::BulletText("LADX-Disassembly contributors");
-        ImGui::BulletText("SameBoy by LIJI32");
+        ImGui::BulletText("Games: Nintendo / Capcom / Flagship (2001)");
+        ImGui::BulletText("Runtime: gb-recompiled and contributors");
+        ImGui::BulletText("SDL2 and Dear ImGui");
+        ImGui::BulletText("Linked-secret codec: ZoraSharp / Amy Nagle");
+        ImGui::TextWrapped("Additional attribution and license notices are included with this application.");
     }
     ImGui::End();
 }
@@ -1562,6 +1713,12 @@ static uint32_t settings_hash(void) {
     h = h * 31 + g_menu.scanlines;
     h = h * 31 + g_lcd_mode;
     h = h * 31 + g_autosave_minutes;
+    h = h * 31 + g_extra_items_enabled;
+    h = h * 31 + g_extra_indicators;
+    h = h * 31 + g_extra_x_item;
+    h = h * 31 + g_extra_y_item;
+    h = h * 31 + g_extra_r_item;
+    h = h * 31 + g_extra_l_item;
     return h;
 }
 
@@ -1581,7 +1738,7 @@ extern "C" void menu_gui_draw(GBContext* ctx)
     /* Floating windows opened from menu */
     if (g_menu.show_debug)      draw_debug_window(ctx);
     if (g_menu.show_about)      draw_about_window();
-    if (g_menu.show_controller) draw_controller_window();
+    if (g_menu.show_controller) draw_controller_window(ctx);
 
     /* Asset viewer */
     asset_viewer_draw(ctx);

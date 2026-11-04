@@ -224,6 +224,8 @@ static SDL_GameController* g_gamepad = NULL;
  * mapping — notably the DualShock on the OpenOrbis PS4 SDL2 port. */
 static SDL_Joystick* g_joystick = NULL;
 
+#include "oracle_extra_sword_test.inc"
+
 /* ============================================================================
  * Android on-screen touch controls
  * ========================================================================== */
@@ -502,6 +504,7 @@ static int g_frame_count = 0;
  * ========================================================================== */
 
 void gb_platform_shutdown(void) {
+    oracle_extra_test::shutdown(g_ctx);
     remember_window_size();
     gb_slots_shutdown();
 #ifdef LA_HAS_MULTIPLAYER
@@ -779,6 +782,7 @@ static const uint8_t gb_btn_buttons_mask[GB_BTN_COUNT] = {
 
 bool gb_platform_poll_events(GBContext* ctx) {
     g_ctx = ctx;
+    const bool oracle_reserve_x = oracle_extra_test::enabled_for(ctx);
 
     if (menu_gui_quit_requested()) return false;
 
@@ -889,11 +893,21 @@ bool gb_platform_poll_events(GBContext* ctx) {
     /* ---- Keyboard (poll) ---- */
     const Uint8* kbstate = SDL_GetKeyboardState(NULL);
     const KeyBind* kb = menu_gui_get_key_binds();
+    /* Text-entry keys stay captured until released, including Enter. */
+    static bool text_key_blocked[SDL_NUM_SCANCODES] = {};
+    bool typing_text = false;
+#ifdef LA_HAS_IMGUI
+    typing_text = ImGui::GetCurrentContext() && ImGui::GetIO().WantTextInput;
+#endif
+    for (int scan = 0; scan < SDL_NUM_SCANCODES; ++scan) {
+        if (!kbstate[scan]) text_key_blocked[scan] = false;
+        else if (typing_text) text_key_blocked[scan] = true;
+    }
 
     for (int i = 0; i < GB_BTN_COUNT; i++) {
         bool held = false;
-        if (kb[i].key0 >= 0 && kbstate[kb[i].key0]) held = true;
-        if (kb[i].key1 >= 0 && kbstate[kb[i].key1]) held = true;
+        if (kb[i].key0 >= 0 && !text_key_blocked[kb[i].key0] && kbstate[kb[i].key0]) held = true;
+        if (kb[i].key1 >= 0 && !text_key_blocked[kb[i].key1] && kbstate[kb[i].key1]) held = true;
 
         if (held) {
             g_joypad_dpad    &= ~gb_btn_dpad_mask[i];
@@ -912,11 +926,13 @@ bool gb_platform_poll_events(GBContext* ctx) {
 
             /* Primary button */
             if (pb[i].button >= 0 &&
+                (!oracle_reserve_x || (pb[i].button != SDL_CONTROLLER_BUTTON_X && pb[i].button != SDL_CONTROLLER_BUTTON_Y && pb[i].button != SDL_CONTROLLER_BUTTON_LEFTSHOULDER && pb[i].button != SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) &&
                 SDL_GameControllerGetButton(g_gamepad, (SDL_GameControllerButton)pb[i].button))
                 held = true;
 
             /* Alt button */
             if (pb[i].button1 >= 0 &&
+                (!oracle_reserve_x || (pb[i].button1 != SDL_CONTROLLER_BUTTON_X && pb[i].button1 != SDL_CONTROLLER_BUTTON_Y && pb[i].button1 != SDL_CONTROLLER_BUTTON_LEFTSHOULDER && pb[i].button1 != SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) &&
                 SDL_GameControllerGetButton(g_gamepad, (SDL_GameControllerButton)pb[i].button1))
                 held = true;
 
@@ -980,6 +996,9 @@ bool gb_platform_poll_events(GBContext* ctx) {
             g_joypad_buttons &= e->buttons;
         }
     }
+
+    oracle_extra_test::poll(ctx, g_gamepad, oracle_reserve_x, g_window_focused);
+    /* Item input diagnostics are disabled in normal builds. */
 
     /* ---- Fire joypad interrupt on new presses ---- */
     if (ctx) {
@@ -1203,9 +1222,15 @@ void gb_platform_render_frame(const uint32_t* framebuffer) {
 
     // ImGui Frame
 #ifdef LA_HAS_IMGUI
+    // Reserve controller input for gameplay while extra item buttons are enabled.
+    if (oracle_extra_test::enabled_for(g_ctx))
+        ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+    else
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
+    oracle_extra_test::draw_indicator(g_ctx, g_gamepad, present_dst);
 #endif
 
 #ifdef LA_HAS_MULTIPLAYER
