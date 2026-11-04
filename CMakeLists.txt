@@ -33,9 +33,9 @@ foreach(game ages seasons)
 endforeach()
 target_compile_definitions(oracle-ages PRIVATE
   ORACLE_ROM_SHA1="880374fb978b18af4aa529e2e32f7ffb4d7dd2f4"
-  ORACLE_GAME_TITLE="Oracle of Ages - Interpreter Test")
+  ORACLE_GAME_TITLE="Oracle of Ages")
 target_compile_definitions(oracle-seasons PRIVATE
   ORACLE_ROM_SHA1="ba1268290fb2b1b70505d2d7b5825fc8a4816a4b"
-  ORACLE_GAME_TITLE="Oracle of Seasons - Interpreter Test")
+  ORACLE_GAME_TITLE="Oracle of Seasons")
 
 add_subdirectory(launcher)

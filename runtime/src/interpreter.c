@@ -102,6 +102,12 @@ void gb_interpret(GBContext* ctx, uint16_t addr) {
     uint32_t instructions_executed = 0;
 
     while (!ctx->stopped) {
+
+        /* Independent X: intercept the item-update entry inside the interpreter. */
+        if (ctx->rom_bank == 6 && (ctx->pc == 0x48c1 || ctx->pc == 0x4922) &&
+            gb_independent_sword_before_update(ctx))
+            return;
+
         instructions_executed++;
         
         /* Debug logging */

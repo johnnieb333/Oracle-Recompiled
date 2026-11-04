@@ -61,7 +61,7 @@ inline const char* gameplay_block_reason(const GBContext* c) {
      * are intentionally left behind when that menu closes. */
     if(mem(r,0xcbcb)!=0)return "An original in-game menu is open. Close it before editing.";
     if(mem(r,0xcba0)!=0)return "Dialogue or a text box is active. Finish it before editing.";
-    if(mem(r,0xcc49)!=0)return "A warp is active. Wait until it finishes.";
+    if(mem(r,0xcc4b)!=0)return "A warp is active. Wait until it finishes.";
     if(mem(r,0xcc4f)!=0)return "Link is in a forced action. Wait until it finishes.";
     if(mem(r,0xcd04)!=2||mem(r,0xcd00)!=1)return "A screen transition or scrolling lock is active.";
     return NULL;

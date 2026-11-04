@@ -1,4 +1,4 @@
-# Oracle Portable — Interpreter Preview
+# Oracle Portable v0.2.0-beta
 
 [Join our Discord](https://discord.gg/hsJHBQfmAS) — chat, get help, report bugs, and follow updates.
 
@@ -10,6 +10,23 @@ on the main branch.
 ## Enhancements at a glance
 
 **Press F1 to show or hide the in-game menu.** The menu starts hidden so you can play with an unobstructed game view.
+
+### Four extra item buttons in both games
+
+Open **F1 → Controller** and turn on **Enable extra item buttons**. Assign owned
+items to gamepad **X, Y, L and R**, keeping the original A/B item assignments.
+The lists show only owned, supported items, with the current upgrade names.
+Assignments and settings save separately for each game.
+
+**Show button indicators** optionally displays the four input boxes. Both
+options default off. Turning extra controls off restores those buttons' normal
+mappings. Keyboard A/B bindings continue to use the normal mapping system.
+
+### Exact game speed
+
+Under **F1 → Config**, type a **Game speed (%)** value from 10 to 500 and press
+Enter. **25%** is quarter speed, **50%** half speed and **100%** normal.
+**Reset to Normal** restores 100%.
 
 ### Editors for both adventures
 
@@ -76,6 +93,10 @@ The launcher is produced at build/bin/oracle-launcher.exe.
 
 Both games launched, reached gameplay, and retained saves after reopening.
 The interpreter experiment also passed user-reported autosave and editor checks.
+The v0.2.0-beta extra-item controls were exercised in both games, including
+A/B aliases, simultaneous items, held input through screen transitions, ammo
+checks and settings persistence. Editor access was checked after all four
+season changes and all three Harp travel methods. See VALIDATION.txt for limits.
 Both games launched from a freshly extracted portable ZIP.
 The user estimated the interpreter build took under three minutes.
 A full playthrough and testing on a separate clean Windows PC remain outstanding.

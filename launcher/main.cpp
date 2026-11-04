@@ -113,7 +113,7 @@ void play(int index) {
     fs::path executable = game_executable(game);
     if (executable.empty()) {
         error(std::wstring(L"Cannot find oracle-") + game.folder +
-            L".exe. Keep this launcher in build-launcher\\bin and build the games in the same project's build folder.");
+            L".exe. Keep the launcher, bin folder and game executables together.");
         return;
     }
     std::wstring command = quote_argument(executable.wstring()) + L" --rom " + quote_argument(game.rom);
@@ -123,7 +123,7 @@ void play(int index) {
     if (!CreateProcessW(executable.c_str(), command.data(), nullptr, nullptr, FALSE, 0,
         nullptr, working_directory.c_str(), &startup, &process)) {
         error(L"Windows could not start the game (error " + std::to_wstring(GetLastError()) +
-            L"). Run the launcher from MINGW64 while testing so game DLLs can be found.");
+            L"). Extract the entire package and keep its DLLs beside the executables.");
         return;
     }
     CloseHandle(process.hThread); CloseHandle(process.hProcess);
@@ -147,7 +147,7 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT event, WPARAM wparam, LPARAM lparam
             DEFAULT_CHARSET, 0, 0, CLEARTYPE_QUALITY, 0, L"Segoe UI");
         title_font = CreateFontW(-25, 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE,
             DEFAULT_CHARSET, 0, 0, CLEARTYPE_QUALITY, 0, L"Segoe UI");
-        HWND title = control(L"STATIC", L"Oracle Recompiled", 0, 24, 20, 580, 38);
+        HWND title = control(L"STATIC", L"Oracle Portable v0.2.0-beta", 0, 24, 20, 580, 38);
         SendMessageW(title, WM_SETFONT, reinterpret_cast<WPARAM>(title_font), TRUE);
         control(L"STATIC", L"Choose your own USA ROMs, then start your adventure.", 0, 24, 66, 600, 26);
         for (int index = 0; index < 2; ++index) {
@@ -205,7 +205,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     RECT rectangle{0, 0, 690, 518};
     DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
     AdjustWindowRect(&rectangle, style, FALSE);
-    HWND hwnd = CreateWindowExW(0, cls.lpszClassName, L"Oracle Recompiled Launcher", style,
+    HWND hwnd = CreateWindowExW(0, cls.lpszClassName, L"Oracle Portable v0.2.0-beta", style,
         CW_USEDEFAULT, CW_USEDEFAULT, rectangle.right - rectangle.left, rectangle.bottom - rectangle.top,
         nullptr, nullptr, instance, nullptr);
     if (!hwnd) return 1;

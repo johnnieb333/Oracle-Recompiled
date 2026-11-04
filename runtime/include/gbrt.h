@@ -554,6 +554,8 @@ void gbrt_set_trace_file(const char* filename);
  */
 void gbrt_log_trace(GBContext* ctx, uint16_t bank, uint16_t addr);
 
+bool gb_independent_sword_before_update(GBContext* ctx);
+
 #ifdef __cplusplus
 }
 #endif
